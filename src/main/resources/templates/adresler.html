@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Adres Yönetimi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Adres Listesi</h2>
+
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#adresModal" id="btnYeniAdres">Yeni Adres</button>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Şehir</th>
+            <th>İlçe</th>
+            <th>Mahalle</th>
+            <th>İşlemler</th>
+        </tr>
+        </thead>
+        <tbody id="adresTableBody">
+        <!-- Adresler jQuery ile buraya yüklenecek -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="adresModal" tabindex="-1" aria-labelledby="adresModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="adresForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adresModalLabel">Adres Ekle / Güncelle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="adresId">
+                    <div class="mb-3">
+                        <label>Şehir</label>
+                        <input type="text" id="sehir" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>İlçe</label>
+                        <input type="text" id="ilce" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Mahalle</label>
+                        <input type="text" id="mahalle" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function adresleriYukle() {
+    $.get("/adresler/api", function(data) {
+        let html = '';
+        data.forEach(a => {
+            html += `
+            <tr>
+                <td>${a.sehir}</td>
+                <td>${a.ilce}</td>
+                <td>${a.mahalle}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="duzenle(${a.id})">Düzenle</button>
+                    <button class="btn btn-sm btn-danger" onclick="sil(${a.id})">Sil</button>
+                </td>
+            </tr>`;
+        });
+        $("#adresTableBody").html(html);
+    });
+}
+
+$("#btnYeniAdres").click(function () {
+    $("#adresForm")[0].reset();
+    $("#adresId").val('');
+});
+
+$("#adresForm").submit(function (e) {
+    e.preventDefault();
+
+    const adres = {
+        sehir: $("#sehir").val(),
+        ilce: $("#ilce").val(),
+        mahalle: $("#mahalle").val()
+    };
+
+    const id = $("#adresId").val();
+
+    if (id) {
+        $.ajax({
+            url: "/adresler/api/" + id,
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(adres),
+            success: function () {
+                $("#adresModal").modal('hide');
+                adresleriYukle();
+            }
+        });
+    } else {
+        $.ajax({
+            url: "/adresler/api",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(adres),
+            success: function () {
+                $("#adresModal").modal('hide');
+                adresleriYukle();
+            }
+        });
+    }
+});
+
+function duzenle(id) {
+    $.get("/adresler/api/" + id, function (data) {
+        $("#adresId").val(data.id);
+        $("#sehir").val(data.sehir);
+        $("#ilce").val(data.ilce);
+        $("#mahalle").val(data.mahalle);
+        $("#adresModal").modal('show');
+    });
+}
+
+function sil(id) {
+    if (confirm("Silmek istediğinize emin misiniz?")) {
+        $.ajax({
+            url: "/adresler/api/" + id,
+            type: "DELETE",
+            success: function () {
+                adresleriYukle();
+            }
+        });
+    }
+}
+
+$(document).ready(function () {
+    adresleriYukle();
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
