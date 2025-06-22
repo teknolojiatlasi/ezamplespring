@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rol Formu</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+<div class="container mt-5" style="max-width: 480px;">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4 text-center" 
+                th:text="${role.id} == null ? 'Yeni Rol' : 'Rol Düzenle'">Rol Formu</h2>
+            <form th:action="@{/admin/roles/save}" th:object="${role}" method="post">
+                <input type="hidden" th:field="*{id}" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Rol Adı</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        th:field="*{name}" 
+                        class="form-control" 
+                        placeholder="Örn: ROLE_ADMIN" 
+                        required 
+                        autofocus />
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                    <a th:href="@{/admin/roles}" class="btn btn-outline-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle CDN (Popper + Bootstrap JS) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
